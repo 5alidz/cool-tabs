@@ -1,86 +1,62 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 
-const Home: NextPage = () => {
+const fruites = ['apple', 'mango', 'bannana', 'kiwi', 'orange'];
+
+export default function Home() {
+  const [active, setActive] = useState(() => fruites[0]);
+  const followerTabRef = useRef<null | HTMLDivElement>(null);
+  const parentRef = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    const follower = followerTabRef.current;
+    const target = document.querySelector(`[data-id="${active}"]`);
+    const parent = parentRef.current;
+    if (!follower || !target || !parent) return;
+    const targetRect = target.getBoundingClientRect();
+    const followerRect = follower.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+    const xDiff = targetRect.x - followerRect.x;
+    const leftPadding = window
+      .getComputedStyle(parent)
+      .getPropertyValue('padding-left');
+
+    follower.style.width = `${targetRect.width}px`;
+    follower.style.height = `${targetRect.height}px`;
+    follower.style.transform = `translateX(${
+      targetRect.left - (parentRect.left + parseInt(leftPadding))
+    }px)`;
+
+    console.log({ xDiff, targetX: targetRect.x, followerX: followerRect.x });
+
+    console.log({ followerRect, targetRect });
+  }, [active]);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
+    <main className='flex items-center w-full min-h-screen p-2 jusitfy-center'>
+      <div
+        className='flex items-center w-full max-w-4xl mx-auto [&>*]:flex-1 rounded-lg bg-blue-200 p-1 relative'
+        ref={parentRef}
+      >
+        <div
+          ref={followerTabRef}
+          className='absolute transition-transform ease-in-out rounded-lg top-1 left-1 bg-gray-50/60'
+        />
+        {fruites.map((fruit) => (
+          <button
+            data-id={fruit}
+            key={fruit}
+            onClick={() => {
+              setActive(fruit);
+            }}
+            className={clsx(
+              'flex justify-center w-full h-full py-3 rounded-lg z-10'
+            )}
           >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
-    </div>
-  )
+            <div className='text-lg font-semibold capitalize'>{fruit}</div>
+          </button>
+        ))}
+      </div>
+    </main>
+  );
 }
-
-export default Home

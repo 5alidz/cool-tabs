@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const fruites = ['apple', 'mango', 'bannana', 'kiwi', 'orange'];
 
@@ -8,15 +7,13 @@ export default function Home() {
   const followerTabRef = useRef<null | HTMLDivElement>(null);
   const parentRef = useRef<null | HTMLDivElement>(null);
 
-  useEffect(() => {
+  const calculateFollowerPosition = useCallback(() => {
     const follower = followerTabRef.current;
     const target = document.querySelector(`[data-id="${active}"]`);
     const parent = parentRef.current;
     if (!follower || !target || !parent) return;
     const targetRect = target.getBoundingClientRect();
-    const followerRect = follower.getBoundingClientRect();
     const parentRect = parent.getBoundingClientRect();
-    const xDiff = targetRect.x - followerRect.x;
     const leftPadding = window
       .getComputedStyle(parent)
       .getPropertyValue('padding-left');
@@ -26,16 +23,16 @@ export default function Home() {
     follower.style.transform = `translateX(${
       targetRect.left - (parentRect.left + parseInt(leftPadding))
     }px)`;
+  }, [active]);
 
-    console.log({ xDiff, targetX: targetRect.x, followerX: followerRect.x });
-
-    console.log({ followerRect, targetRect });
+  useEffect(() => {
+    calculateFollowerPosition();
   }, [active]);
 
   return (
     <main className='flex items-center w-full min-h-screen p-2 jusitfy-center'>
       <div
-        className='flex items-center w-full max-w-4xl mx-auto [&>*]:flex-1 rounded-lg bg-blue-200 p-1 relative'
+        className='flex items-center w-full max-w-4xl mx-auto [&>*]:flex-1 rounded-lg bg-blue-100 p-1 relative overflow-x-hidden'
         ref={parentRef}
       >
         <div
@@ -46,14 +43,12 @@ export default function Home() {
           <button
             data-id={fruit}
             key={fruit}
-            onClick={() => {
-              setActive(fruit);
-            }}
-            className={clsx(
-              'flex justify-center w-full h-full py-3 rounded-lg z-10'
-            )}
+            onClick={() => setActive(fruit)}
+            className='z-10 flex justify-center w-full h-full py-3 rounded-lg'
           >
-            <div className='text-lg font-semibold capitalize'>{fruit}</div>
+            <div className='text-sm font-semibold text-blue-900 capitalize md:text-base lg:text-lg'>
+              {fruit}
+            </div>
           </button>
         ))}
       </div>
